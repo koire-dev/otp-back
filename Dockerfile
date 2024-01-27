@@ -1,6 +1,5 @@
 # Stage 1: Build the application
 FROM maven:3.8.1-openjdk-17 AS build
-RUN echo "nameserver 192.168.43.1" > /etc/resolv.conf
 WORKDIR /app/otp
 COPY pom.xml .
 
