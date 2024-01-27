@@ -1,22 +1,23 @@
 package afrikpay.otp.services;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class FormatServiceTest {
+class FormatServiceTest {
 
-    @Autowired
-    private FormatService formatService;
+    private final FormatService formatService = new FormatService();
 
     @Test
-    public void isValideWithSucces(){
-        assertEquals(formatService.isFormat("237698192286"), true);
+    void testIsFormatValid() {
+        // Numéro de téléphone au format valide
+        assertTrue(formatService.isFormat("237612345678"));
+
+        // Numéro de téléphone avec une longueur incorrecte
+        assertFalse(formatService.isFormat("23761234567"));
+
+        // Numéro de téléphone avec un code incorrect
+        assertFalse(formatService.isFormat("123612345678"));
     }
 }

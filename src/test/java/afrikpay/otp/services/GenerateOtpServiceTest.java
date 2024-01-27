@@ -1,22 +1,21 @@
 package afrikpay.otp.services;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class GenerateOtpServiceTest {
+class GenerateOtpServiceTest {
 
-    @Autowired
-    private GenerateOtpService generateOtpService;
+    private final GenerateOtpService generateOtpService = new GenerateOtpService();
 
     @Test
-    public void generateOtp() {
-        assertNotEquals(generateOtpService.generateOtp(), "4534982632015894");
+    void testGenerateOtp() {
+        // Exécution du service pour générer un OTP
+        String otp = generateOtpService.generateOtp();
+
+        // Vérifications
+        assertEquals(16, otp.length()); // Vérifie la longueur de l'OTP
+        assertTrue(otp.matches("\\d{16}"), "L'OTP doit contenir uniquement des chiffres"); // Vérifie que l'OTP ne contient que des chiffres
     }
 }

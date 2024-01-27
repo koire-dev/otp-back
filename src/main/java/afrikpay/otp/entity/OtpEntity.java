@@ -22,7 +22,7 @@ public class OtpEntity implements Serializable {
     private Integer reference;
 
     @Column(nullable = false, unique = true)
-    private String otpId;
+    private String otpid;
 
     @Column(nullable = false)
     private Integer code;

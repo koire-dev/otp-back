@@ -1,11 +1,16 @@
 package afrikpay.otp.services;
 
+import afrikpay.otp.dto.GenerateOTPRequest;
+import afrikpay.otp.dto.GenerateOTPResponse;
+import afrikpay.otp.dto.ValidateOTPRequest;
+import afrikpay.otp.dto.ValidateOTPResponse;
 import afrikpay.otp.entity.OtpEntity;
 import afrikpay.otp.repository.OtpRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class OtpService {
@@ -23,8 +28,9 @@ public class OtpService {
         this.generateOtpService = generateOtpService;
     }
 
-    public OtpEntity createOtp(String telephone){
+    public GenerateOTPResponse generateOTP(GenerateOTPRequest request) {
 
+        String telephone = request.getTelephone();
         if (formatService.isFormat(telephone) == true){
             OtpEntity otpEntity = new OtpEntity();
 //        code et reference vont garder les 8 derniers chiffres du numero de telephone, donc excepter 2376
@@ -32,24 +38,25 @@ public class OtpService {
 
             String otpId = generateOtpService.generateOtp();
 
-            otpEntity.setOtpId(otpId);
+            otpEntity.setOtpid(otpId);
             otpEntity.setExpirationDate(new Date(System.currentTimeMillis() + expiryInterval));
             otpEntity.setCode(code);
             otpEntity.setReference(code);
+            otpRepository.save(otpEntity);
 
-            return otpRepository.save(otpEntity);
+            GenerateOTPResponse response = new GenerateOTPResponse();
+            response.setResult(otpEntity.getOtpid());
+            return response;
         }
         return null;
     }
 
-    public boolean isValide(int code, String otpId){
+    public ValidateOTPResponse validateOTP(ValidateOTPRequest request) {
+        Optional<OtpEntity> otpOptional = otpRepository.findByCodeAndOtpid(request.getCode(), request.getOtpid());
 
-        boolean result = false;
-        for (OtpEntity otpEntity : otpRepository.findAll()){
-            if((otpEntity.getCode().equals(code)) && (otpEntity.getOtpId().equals(otpId))){
-                result = true;
-            }
-        }
-        return result;
+        ValidateOTPResponse response = new ValidateOTPResponse();
+        response.setResult(otpOptional.isPresent() ? "success" : "failed");
+        return response;
     }
+
 }

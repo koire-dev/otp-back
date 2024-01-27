@@ -1,0 +1,28 @@
+# Fichiers générés par Maven
+target/
+*/target/
+
+# Fichiers spécifiques à l'IDE (ex : IntelliJ, Eclipse)
+.idea/
+*.iml
+
+# Fichiers temporaires ou caches
+*.log
+*.swp
+.DS_Store
+
+# Fichiers spécifiques à Git
+.git/
+.gitignore
+
+# Fichiers de configuration Maven
+.mvn/
+
+# Fichiers de configuration Spring Boot
+*.jar
+*.war
+*.ear
+
+# Répertoires et fichiers spécifiques à Spring Boot
+logs/
+spring-boot-*.properties

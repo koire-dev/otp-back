@@ -1,60 +1,81 @@
 package afrikpay.otp.services;
-
+import afrikpay.otp.dto.GenerateOTPRequest;
+import afrikpay.otp.dto.GenerateOTPResponse;
+import afrikpay.otp.dto.ValidateOTPRequest;
+import afrikpay.otp.dto.ValidateOTPResponse;
 import afrikpay.otp.entity.OtpEntity;
 import afrikpay.otp.repository.OtpRepository;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import static org.junit.jupiter.api.Assertions.*;
-import java.util.Date;
+import java.util.Optional;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class OtpServiceTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
-    @Autowired
-    private OtpService otpService;
-    @Autowired
+class OtpServiceTest {
+
+    @Mock
     private OtpRepository otpRepository;
 
-    private final Long expiryInterval = 5L * 60 * 1000;
+    @Mock
+    private FormatService formatService;
 
-    @Test
-    public void createOtp() {
-        OtpEntity otpEntity = new OtpEntity();
-        otpEntity.setOtpId("5894362105876431");
-        otpEntity.setCode(98192286);
-        otpEntity.setReference(98192286);
-        otpEntity.setCreationDate(new Date());
-        otpEntity.setExpirationDate((new Date(System.currentTimeMillis() + expiryInterval)));
+    @Mock
+    private GenerateOtpService generateOtpService;
 
-//        OtpEntity saveOtpEntity = otpRepository.save(otpEntity);
+    @InjectMocks
+    private OtpService otpService;
 
-        OtpEntity otpGenerate = otpService.createOtp("237698192286");
-
-        assertNotNull(otpGenerate);
-        assertNotNull(otpGenerate.getId());
-        assertNotEquals(otpEntity.getOtpId(), otpGenerate.getOtpId());
-        assertEquals(otpEntity.getCode(), otpGenerate.getCode());
-        assertEquals(otpEntity.getExpirationDate(), otpGenerate.getExpirationDate());
-        assertEquals(otpEntity.getCreationDate(), otpGenerate.getCreationDate());
-        assertEquals(otpEntity.getReference(), otpGenerate.getReference());
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void isValide() {
+    void testGenerateOTP() {
+        // Données de test
+        GenerateOTPRequest generateOTPRequest = new GenerateOTPRequest();
+        generateOTPRequest.setTelephone("237612345678");
 
-        OtpEntity otpEntity = new OtpEntity();
-        otpEntity.setOtpId("5894362105876430");
-        otpEntity.setCode(98192286);
-        otpEntity.setReference(98192286);
-        otpEntity.setCreationDate(new Date());
-        otpEntity.setExpirationDate((new Date(System.currentTimeMillis() + expiryInterval)));
+        // Mock du service de format
+        when(formatService.isFormat(any(String.class))).thenReturn(true);
 
-        otpRepository.save(otpEntity);
-        assertEquals(otpService.isValide(98192286, "5894362105876430"), true);
+        // Mock du service de génération d'OTP
+        when(generateOtpService.generateOtp()).thenReturn("generated-otpid");
+
+        // Mock du repository
+        when(otpRepository.save(any(OtpEntity.class))).thenReturn(new OtpEntity());
+
+        // Exécution du service
+        GenerateOTPResponse response = otpService.generateOTP(generateOTPRequest);
+
+        // Vérifications
+        assertNotNull(response);
+        assertEquals("generated-otpid", response.getResult());
+    }
+
+    @Test
+    void testValidateOTP() {
+        // Données de test
+        ValidateOTPRequest validateOTPRequest = new ValidateOTPRequest();
+        validateOTPRequest.setCode(12345678);
+        validateOTPRequest.setOtpid("generated-otpid");
+
+        // Mock du repository
+        when(otpRepository.findByCodeAndOtpid(any(Integer.class), any(String.class)))
+                .thenReturn(Optional.of(new OtpEntity()));
+
+        // Exécution du service
+        ValidateOTPResponse response = otpService.validateOTP(validateOTPRequest);
+
+        // Vérifications
+        assertNotNull(response);
+        assertEquals("success", response.getResult());
     }
 }
